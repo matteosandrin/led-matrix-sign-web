@@ -4,26 +4,55 @@
 
 import { MTAProvider } from './data/mta-provider';
 import { MTARenderer } from './renderer/mta-renderer';
+import { WebGLLEDRenderer } from './renderer/webgl-led-renderer';
 import type { TrainTime, Station } from './data/types';
-import { REFRESH_INTERVAL } from './utils/constants';
+import { REFRESH_INTERVAL, DISPLAY_WIDTH, DISPLAY_HEIGHT, SCALE_FACTOR } from './utils/constants';
 import './style.css';
 
 class MTASimulator {
   private provider: MTAProvider;
   private renderer: MTARenderer;
+  private webglRenderer: WebGLLEDRenderer;
+  private sourceCanvas: HTMLCanvasElement;
+  private displayCanvas: HTMLCanvasElement;
   private currentStation: string = 'A20'; // Default: 86 St B,C
   private currentDirection: number | null = null; // null = both directions
   private predictions: TrainTime[] = [];
   private refreshInterval: number | null = null;
 
   constructor() {
-    const canvas = document.getElementById('led-canvas') as HTMLCanvasElement;
-    if (!canvas) {
-      throw new Error('Canvas element not found');
+    const sourceCanvas = document.getElementById('led-canvas') as HTMLCanvasElement;
+    const displayCanvas = document.getElementById('led-display') as HTMLCanvasElement;
+
+    if (!sourceCanvas || !displayCanvas) {
+      throw new Error('Canvas elements not found');
     }
 
+    this.sourceCanvas = sourceCanvas;
+    this.displayCanvas = displayCanvas;
+
+    // Set up display canvas size
+    this.displayCanvas.width = DISPLAY_WIDTH * SCALE_FACTOR;
+    this.displayCanvas.height = DISPLAY_HEIGHT * SCALE_FACTOR;
+
     this.provider = new MTAProvider();
-    this.renderer = new MTARenderer(canvas);
+    this.renderer = new MTARenderer(sourceCanvas);
+    this.webglRenderer = new WebGLLEDRenderer(
+      displayCanvas,
+      DISPLAY_WIDTH,
+      DISPLAY_HEIGHT,
+      {
+        ledSize: 0.85,
+        glowIntensity: 0.3,
+        glowRadius: 1.5,
+        separationGap: 0.15,
+      }
+    );
+
+    // Set up animation frame callback to trigger WebGL render
+    this.renderer.setAnimationFrameCallback(() => {
+      this.webglRenderer.render(this.sourceCanvas);
+    });
   }
 
   async initialize(): Promise<void> {
@@ -151,8 +180,11 @@ class MTASimulator {
       }
     }
 
-    // Render
+    // Render to source canvas (2D context)
     await this.renderer.render(displayPredictions);
+
+    // Apply WebGL LED shader effect to display canvas
+    this.webglRenderer.render(this.sourceCanvas);
 
     // Update info display
     this.updateInfo();

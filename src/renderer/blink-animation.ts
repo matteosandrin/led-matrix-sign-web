@@ -21,6 +21,7 @@ export class BlinkAnimation {
   private height: number;
   private font: string;
   private onComplete: () => void;
+  private onFrame?: () => void;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -30,7 +31,8 @@ export class BlinkAnimation {
     width: number,
     height: number,
     font: string,
-    onComplete: () => void
+    onComplete: () => void,
+    onFrame?: () => void
   ) {
     this.ctx = ctx;
     this.text = text;
@@ -40,6 +42,7 @@ export class BlinkAnimation {
     this.height = height;
     this.font = font;
     this.onComplete = onComplete;
+    this.onFrame = onFrame;
   }
 
   start(): void {
@@ -68,6 +71,12 @@ export class BlinkAnimation {
       // Draw final text frame and stop
       this.drawText();
       this.isRunning = false;
+
+      // Trigger frame update before completing
+      if (this.onFrame) {
+        this.onFrame();
+      }
+
       this.onComplete();
       return;
     }
@@ -82,6 +91,11 @@ export class BlinkAnimation {
       this.drawText();
     } else {
       this.drawBlank();
+    }
+
+    // Trigger frame update callback (for WebGL rendering)
+    if (this.onFrame) {
+      this.onFrame();
     }
 
     // Schedule next frame

@@ -22,11 +22,19 @@ export class MTARenderer {
   private textRenderer: TextRenderer;
   private imageRenderer: ImageRenderer;
   private blinkAnimation: BlinkAnimation | null = null;
+  private onAnimationFrame?: () => void;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvasRenderer = new CanvasRenderer(canvas);
     this.textRenderer = new TextRenderer(this.canvasRenderer.getContext());
     this.imageRenderer = new ImageRenderer();
+  }
+
+  /**
+   * Set callback to be called on each animation frame (for WebGL rendering)
+   */
+  setAnimationFrameCallback(callback: () => void): void {
+    this.onAnimationFrame = callback;
   }
 
   /**
@@ -159,6 +167,12 @@ export class MTARenderer {
       () => {
         // Animation complete callback
         this.blinkAnimation = null;
+      },
+      () => {
+        // Frame callback - trigger WebGL render
+        if (this.onAnimationFrame) {
+          this.onAnimationFrame();
+        }
       }
     );
 
