@@ -9,6 +9,7 @@ import { MAX_NUM_PREDICTIONS } from '../utils/constants';
 export class MTAProvider {
   private historicalData: HistoricalData | null = null;
   private stations: Station[] = [];
+  private childStationIds: Set<string> = new Set();
   private lastSecondTrain: TrainTime | null = null;
 
   async loadData(): Promise<void> {
@@ -19,9 +20,36 @@ export class MTAProvider {
     // Load stations
     const stationsResponse = await fetch('/stations.json');
     this.stations = await stationsResponse.json();
+
+    // Build set of all child station IDs for filtering
+    this.buildChildStationSet();
   }
 
+  /**
+   * Build a set of all station IDs that are children of other stations
+   */
+  private buildChildStationSet(): void {
+    this.childStationIds.clear();
+    for (const station of this.stations) {
+      if (station.children) {
+        for (const childId of station.children) {
+          this.childStationIds.add(childId);
+        }
+      }
+    }
+  }
+
+  /**
+   * Get stations for display (excludes child stations)
+   */
   getStations(): Station[] {
+    return this.stations.filter(station => !this.childStationIds.has(station.stop_id));
+  }
+
+  /**
+   * Get all stations including children (for internal use)
+   */
+  private getAllStations(): Station[] {
     return this.stations;
   }
 
@@ -31,65 +59,75 @@ export class MTAProvider {
 
   /**
    * Get predictions for a given stop ID and direction
+   * Includes predictions from child stations if any
    */
   getPredictions(stopId: string, direction: number | null = null): TrainTime[] {
     if (!this.historicalData) {
       return [];
     }
 
-    const historicalTimes = this.historicalData[stopId];
-    if (!historicalTimes) {
-      return [];
+    // Get all station IDs to check (parent + children)
+    const stationIdsToCheck = [stopId];
+    const station = this.getStation(stopId);
+    if (station?.children) {
+      stationIdsToCheck.push(...station.children);
     }
 
     const now = new Date();
     const currentDayType = this.getDayType(now);
     const currentSecondsFromMidnight = this.getSecondsFromMidnight(now);
 
-    // Filter and convert historical times to predictions
+    // Collect predictions from all relevant stations
     const predictions: TrainTime[] = [];
 
-    for (const histTime of historicalTimes) {
-      // Filter by day type
-      if (histTime.day_type !== currentDayType) {
+    for (const stationId of stationIdsToCheck) {
+      const historicalTimes = this.historicalData[stationId];
+      if (!historicalTimes) {
         continue;
       }
 
-      // Filter by direction if specified
-      if (direction !== null && histTime.direction_id !== direction.toString()) {
-        continue;
+      for (const histTime of historicalTimes) {
+        // Filter by day type
+        if (histTime.day_type !== currentDayType) {
+          continue;
+        }
+
+        // Filter by direction if specified
+        if (direction !== null && histTime.direction_id !== direction.toString()) {
+          continue;
+        }
+
+        // Calculate wait time
+        let waitTime = histTime.departure_time - currentSecondsFromMidnight;
+
+        // Handle times that wrap past midnight
+        if (waitTime < 0) {
+          waitTime += 24 * 3600;
+        }
+
+        // Only show trains in the next hour
+        if (waitTime > 3600) {
+          continue;
+        }
+
+        // Skip trains that have already left (negative times after adjustment)
+        if (waitTime < 0) {
+          continue;
+        }
+
+        // Check if this is an express train
+        const isExpress = this.isExpressTrain(histTime.route_id, histTime.trip_id);
+
+        predictions.push({
+          route_id: histTime.route_id,
+          direction_id: histTime.direction_id,
+          long_name: histTime.long_name,
+          time: waitTime,
+          display_order: 0, // Will be set after sorting
+          trip_id: histTime.trip_id,
+          is_express: isExpress,
+        });
       }
-
-      // Calculate wait time
-      let waitTime = histTime.departure_time - currentSecondsFromMidnight;
-
-      // Handle times that wrap past midnight
-      if (waitTime < 0) {
-        waitTime += 24 * 3600;
-      }
-
-      // Only show trains in the next hour
-      if (waitTime > 3600) {
-        continue;
-      }
-
-      // Skip trains that have already left (negative times after adjustment)
-      if (waitTime < 0) {
-        continue;
-      }
-
-      // Check if this is an express train
-      const isExpress = this.isExpressTrain(histTime.route_id, histTime.trip_id);
-
-      predictions.push({
-        route_id: histTime.route_id,
-        direction_id: histTime.direction_id,
-        long_name: histTime.long_name,
-        time: waitTime,
-        display_order: 0, // Will be set after sorting
-        trip_id: histTime.trip_id,
-        is_express: isExpress,
-      });
     }
 
     // Sort by time and assign display order
