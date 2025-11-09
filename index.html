@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MTA LED Matrix Simulator</title>
+    <style>
+      @font-face {
+        font-family: 'MTASans';
+        src: url('/MTASans-Medium.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-exx0vtEV.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CYIfWXbq.css">
+  </head>
+  <body>
+    <div id="app">
+      <div class="display-container">
+        <canvas id="led-canvas" style="display: none;"></canvas>
+        <canvas id="led-display"></canvas>
+      </div>
+
+      <div class="controls">
+        <select id="station-selector">
+          <option>Loading...</option>
+        </select>
+
+        <div class="button-group">
+          <button id="both-btn" class="active">All</button>
+          <button id="uptown-btn">Uptown</button>
+          <button id="downtown-btn">Downtown</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
