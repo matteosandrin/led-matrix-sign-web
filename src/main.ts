@@ -18,7 +18,6 @@ class MTASimulator {
   private currentStation: string = 'A20'; // Default: 86 St B,C
   private currentDirection: number | null = null; // null = both directions
   private predictions: TrainTime[] = [];
-  private refreshInterval: number | null = null;
 
   constructor() {
     const sourceCanvas = document.getElementById('led-canvas') as HTMLCanvasElement;
@@ -225,7 +224,7 @@ class MTASimulator {
 
   private startAutoRefresh(): void {
     // Refresh predictions every 5 seconds
-    this.refreshInterval = window.setInterval(async () => {
+    window.setInterval(async () => {
       await this.refresh();
     }, REFRESH_INTERVAL);
   }

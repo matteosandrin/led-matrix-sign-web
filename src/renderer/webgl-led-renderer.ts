@@ -26,6 +26,9 @@ export class WebGLLEDRenderer {
   private gl: WebGLRenderingContext;
   private program: WebGLProgram | null = null;
   private sourceTexture: WebGLTexture | null = null;
+  private displayCanvas: HTMLCanvasElement;
+  private sourceWidth: number;
+  private sourceHeight: number;
 
   // Shader locations
   private locations: {
@@ -43,11 +46,14 @@ export class WebGLLEDRenderer {
   private params: LEDShaderParams;
 
   constructor(
-    private displayCanvas: HTMLCanvasElement,
-    private sourceWidth: number,
-    private sourceHeight: number,
+    displayCanvas: HTMLCanvasElement,
+    sourceWidth: number,
+    sourceHeight: number,
     params: Partial<LEDShaderParams> = {}
   ) {
+    this.displayCanvas = displayCanvas;
+    this.sourceWidth = sourceWidth;
+    this.sourceHeight = sourceHeight;
     this.params = { ...DEFAULT_PARAMS, ...params };
 
     const gl = displayCanvas.getContext('webgl', {
