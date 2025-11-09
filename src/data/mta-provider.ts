@@ -6,6 +6,14 @@ import type { HistoricalData, TrainTime, Station } from './types';
 import { DayType } from './types';
 import { MAX_NUM_PREDICTIONS } from '../utils/constants';
 
+interface CompressedHistoricalData {
+  names: string[];
+  data: {
+    [stopId: string]: [string, string, number, number, string][];
+    // Format: [route_id, direction_id, name_index, departure_time, day_type_short]
+  };
+}
+
 export class MTAProvider {
   private historicalData: HistoricalData | null = null;
   private stations: Station[] = [];
@@ -13,9 +21,12 @@ export class MTAProvider {
   private lastSecondTrain: TrainTime | null = null;
 
   async loadData(): Promise<void> {
-    // Load historical data
+    // Load historical data (compressed format)
     const histResponse = await fetch('/historical-data.json');
-    this.historicalData = await histResponse.json();
+    const compressedData: CompressedHistoricalData = await histResponse.json();
+
+    // Decompress data
+    this.historicalData = this.decompressHistoricalData(compressedData);
 
     // Load stations
     const stationsResponse = await fetch('/stations.json');
@@ -23,6 +34,32 @@ export class MTAProvider {
 
     // Build set of all child station IDs for filtering
     this.buildChildStationSet();
+  }
+
+  /**
+   * Decompress the historical data from compact format
+   */
+  private decompressHistoricalData(compressed: CompressedHistoricalData): HistoricalData {
+    const dayTypeMap: Record<string, DayType> = {
+      'w': DayType.WEEKDAY,
+      's': DayType.SATURDAY,
+      'u': DayType.SUNDAY,
+    };
+
+    const decompressed: HistoricalData = {};
+
+    for (const stopId in compressed.data) {
+      decompressed[stopId] = compressed.data[stopId].map(entry => ({
+        route_id: entry[0],
+        direction_id: entry[1],
+        long_name: compressed.names[entry[2]],
+        departure_time: entry[3],
+        trip_id: '', // Not stored in compressed format
+        day_type: dayTypeMap[entry[4]] || entry[4] as DayType,
+      }));
+    }
+
+    return decompressed;
   }
 
   /**
@@ -44,13 +81,6 @@ export class MTAProvider {
    */
   getStations(): Station[] {
     return this.stations.filter(station => !this.childStationIds.has(station.stop_id));
-  }
-
-  /**
-   * Get all stations including children (for internal use)
-   */
-  private getAllStations(): Station[] {
-    return this.stations;
   }
 
   getStation(stopId: string): Station | undefined {
