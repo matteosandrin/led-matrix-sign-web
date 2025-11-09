@@ -28,7 +28,7 @@ export class ImageRenderer {
       img.onerror = () => {
         reject(new Error(`Failed to load icon: ${filename}`));
       };
-      img.src = `/${filename}`;
+      img.src = `/img/${filename}`;
     });
   }
 
