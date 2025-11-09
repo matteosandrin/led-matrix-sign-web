@@ -15,42 +15,21 @@
   </head>
   <body>
     <div id="app">
-      <header>
-        <h1>MTA LED Matrix Arrival Board</h1>
-        <div id="status">Initializing...</div>
-      </header>
+      <div class="display-container">
+        <canvas id="led-canvas"></canvas>
+      </div>
 
-      <main>
-        <div class="display-container">
-          <canvas id="led-canvas"></canvas>
+      <div class="controls">
+        <select id="station-selector">
+          <option>Loading...</option>
+        </select>
+
+        <div class="button-group">
+          <button id="both-btn" class="active">All</button>
+          <button id="uptown-btn">Uptown</button>
+          <button id="downtown-btn">Downtown</button>
         </div>
-
-        <div class="controls">
-          <div class="control-group">
-            <label for="station-selector">Station:</label>
-            <select id="station-selector">
-              <option>Loading...</option>
-            </select>
-          </div>
-
-          <div class="control-group">
-            <label>Direction:</label>
-            <div class="button-group">
-              <button id="uptown-btn">Uptown</button>
-              <button id="downtown-btn">Downtown</button>
-              <button id="both-btn" class="active">Both</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="station-info" class="info-box">
-          Select a station to view arrivals
-        </div>
-      </main>
-
-      <footer>
-        <p>Web simulation of LED matrix display • Uses historical MTA data</p>
-      </footer>
+      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
