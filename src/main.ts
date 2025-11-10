@@ -6,7 +6,7 @@ import { MTAProvider } from './data/mta-provider';
 import { MTARenderer } from './renderer/mta-renderer';
 import { WebGLLEDRenderer } from './renderer/webgl-led-renderer';
 import type { TrainTime, Station } from './data/types';
-import { REFRESH_INTERVAL, DISPLAY_WIDTH, DISPLAY_HEIGHT, SCALE_FACTOR } from './utils/constants';
+import { REFRESH_INTERVAL, DISPLAY_WIDTH, DISPLAY_HEIGHT, SCALE_FACTOR, DEFAULT_STATION } from './utils/constants';
 import './style.css';
 
 class MTASimulator {
@@ -15,7 +15,7 @@ class MTASimulator {
   private webglRenderer: WebGLLEDRenderer;
   private sourceCanvas: HTMLCanvasElement;
   private displayCanvas: HTMLCanvasElement;
-  private currentStation: string = 'A24'; // 59 St-Columbus Circle (1, 2, 3, A, C, B, D, F, M)
+  private currentStation: string = DEFAULT_STATION;
   private currentDirection: number | null = null; // null = both directions
   private predictions: TrainTime[] = [];
 

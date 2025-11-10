@@ -60,3 +60,5 @@ export const ABBREVIATIONS: Record<string, string> = {
   'junction': 'jct',
   'Junction': 'Jct',
 };
+
+export const DEFAULT_STATION = 'A20'; // 86th st B, C
