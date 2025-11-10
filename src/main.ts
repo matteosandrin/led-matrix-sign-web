@@ -15,7 +15,7 @@ class MTASimulator {
   private webglRenderer: WebGLLEDRenderer;
   private sourceCanvas: HTMLCanvasElement;
   private displayCanvas: HTMLCanvasElement;
-  private currentStation: string = DEFAULT_STATION;
+  private currentStation: string;
   private currentDirection: number | null = null; // null = both directions
   private predictions: TrainTime[] = [];
 
@@ -29,6 +29,9 @@ class MTASimulator {
 
     this.sourceCanvas = sourceCanvas;
     this.displayCanvas = displayCanvas;
+
+    // Get station from URL parameter or use default
+    this.currentStation = this.getStationFromURL() || DEFAULT_STATION;
 
     // Set up display canvas size
     this.displayCanvas.width = DISPLAY_WIDTH * SCALE_FACTOR;
@@ -52,6 +55,11 @@ class MTASimulator {
     this.renderer.setAnimationFrameCallback(() => {
       this.webglRenderer.render(this.sourceCanvas);
     });
+  }
+
+  private getStationFromURL(): string | null {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('station');
   }
 
   async initialize(): Promise<void> {
