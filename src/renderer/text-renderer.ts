@@ -40,7 +40,7 @@ export class TextRenderer {
       baseline?: 'top' | 'middle' | 'bottom';
     } = {}
   ): number {
-    const { align = 'left', baseline = 'top' } = options;
+    const { align = 'left', baseline = 'bottom' } = options;
 
     this.ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}, monospace`;
     this.ctx.fillStyle = color;

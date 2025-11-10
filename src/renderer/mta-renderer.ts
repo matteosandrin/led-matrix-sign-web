@@ -109,7 +109,7 @@ export class MTARenderer {
       ctx,
       train.route_id,
       xCursor,
-      y - 5,
+      y - 15,
       train.is_express
     );
     xCursor += ICON_SIZE + 1; // Icon width + 1px spacing
@@ -160,7 +160,7 @@ export class MTARenderer {
       ctx,
       text,
       x,
-      y,
+      y - 15,
       textWidth,
       height,
       font,

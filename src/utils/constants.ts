@@ -50,7 +50,7 @@ export const FONT_FAMILY = 'MTASans';
 
 // Layout
 export const ROW_HEIGHT = 16;
-export const ROW_Y_POSITIONS = [6, 22];
+export const ROW_Y_POSITIONS = [15, 31];
 export const ICON_SIZE = 16;
 
 // Text truncation

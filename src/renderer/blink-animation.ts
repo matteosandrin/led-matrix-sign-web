@@ -106,14 +106,14 @@ export class BlinkAnimation {
     this.ctx.font = this.font;
     this.ctx.fillStyle = MTA_RED_AMBER;
     this.ctx.textAlign = 'right';
-    this.ctx.textBaseline = 'top';
-    this.ctx.fillText(this.text, this.x + this.width, this.y);
+    this.ctx.textBaseline = 'bottom';
+    this.ctx.fillText(this.text, this.x + this.width, this.y + this.height - 1);
   }
 
   private drawBlank(): void {
     // Clear the area where the text would be
     this.ctx.fillStyle = '#000000';
-    this.ctx.fillRect(this.x, this.y - 3, this.width, this.height);
+    this.ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 
   isActive(): boolean {
