@@ -52,7 +52,6 @@ body {
 
 /* Controls */
 .controls {
-  /* display: flex; */
   display: none;
   flex-direction: row;
   gap: 6px;

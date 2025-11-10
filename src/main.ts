@@ -72,9 +72,27 @@ class MTASimulator {
     return urlParams.get("station");
   }
 
+  private shouldShowControls(): boolean {
+    const urlParams = new URLSearchParams(window.location.search);
+    const controls = urlParams.get("controls");
+    // Do not show controls by default
+    // Show controls if parameter is "true" or "1"
+    return controls === "true" || controls === "1";
+  }
+
+  private applyControlsVisibility(): void {
+    const controlsElement = document.querySelector(".controls") as HTMLElement;
+    if (controlsElement) {
+      controlsElement.style.display = this.shouldShowControls() ? "flex" : "none";
+    }
+  }
+
   async initialize(): Promise<void> {
     // Show loading state
     this.updateStatus("Loading data...");
+
+    // Apply controls visibility based on URL parameter
+    this.applyControlsVisibility();
 
     // Load data and initialize renderer
     await Promise.all([this.provider.loadData(), this.renderer.initialize()]);
