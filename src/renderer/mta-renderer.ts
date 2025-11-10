@@ -138,7 +138,7 @@ export class MTARenderer {
     // 7. Draw minutes (right-aligned)
     this.textRenderer.drawText(
       minutesText,
-      DISPLAY_WIDTH - 1,
+      DISPLAY_WIDTH,
       y,
       textColor,
       { align: 'right' }
@@ -152,7 +152,7 @@ export class MTARenderer {
     const text = '0min';
     const font = `${FONT_SIZE}px ${FONT_FAMILY}, monospace`;
     const textWidth = this.textRenderer.measureText(text);
-    const x = DISPLAY_WIDTH - textWidth - 1;
+    const x = DISPLAY_WIDTH - textWidth;
     const y = ROW_Y_POSITIONS[0];
     const height = 16;
 

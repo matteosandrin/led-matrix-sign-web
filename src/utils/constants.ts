@@ -43,7 +43,6 @@ export const ROUTE_COLORS: Record<string, string> = {
 // Display constants
 export const MAX_NUM_PREDICTIONS = 6;
 export const REFRESH_INTERVAL = 5000; // 5 seconds
-export const SECOND_TRAIN_ROTATION_INTERVAL = 5000; // 5 seconds
 
 // Font settings
 export const FONT_SIZE = 10;

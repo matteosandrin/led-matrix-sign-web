@@ -38,7 +38,6 @@ body {
 /* LED Display */
 .display-container {
   background: #000;
-  padding: 12px;
   border-radius: 4px;
   display: inline-block;
   box-shadow:
@@ -53,25 +52,25 @@ body {
 
 #led-display {
   display: block;
-  border: 2px solid #333;
   border-radius: 4px;
   width: 100%;
 }
 
 /* Controls */
 .controls {
-  display: flex;
+  /* display: flex; */
+  display: none;
   flex-direction: row;
   gap: 6px;
-  width: 100%;
 }
 
 #station-selector {
-  flex: 1;
   padding: 6px 8px;
   font-size: 0.85em;
   font-family: inherit;
   cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .button-group {

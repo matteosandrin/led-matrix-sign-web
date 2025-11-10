@@ -15,7 +15,7 @@ class MTASimulator {
   private webglRenderer: WebGLLEDRenderer;
   private sourceCanvas: HTMLCanvasElement;
   private displayCanvas: HTMLCanvasElement;
-  private currentStation: string = 'A20'; // Default: 86 St B,C
+  private currentStation: string = 'A24'; // 59 St-Columbus Circle (1, 2, 3, A, C, B, D, F, M)
   private currentDirection: number | null = null; // null = both directions
   private predictions: TrainTime[] = [];
 
