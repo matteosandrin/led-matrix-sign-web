@@ -2,11 +2,11 @@
  * MTA content renderer - displays train predictions on LED matrix
  */
 
-import type { TrainTime } from '../data/types';
-import { CanvasRenderer } from './canvas-renderer';
-import { TextRenderer } from './text-renderer';
-import { ImageRenderer } from './image-renderer';
-import { BlinkAnimation } from './blink-animation';
+import type { TrainTime } from "../data/types";
+import { CanvasRenderer } from "./canvas-renderer";
+import { TextRenderer } from "./text-renderer";
+import { ImageRenderer } from "./image-renderer";
+import { BlinkAnimation } from "./blink-animation";
 import {
   MTA_GREEN,
   MTA_RED_AMBER,
@@ -15,7 +15,7 @@ import {
   ICON_SIZE,
   FONT_SIZE,
   FONT_FAMILY,
-} from '../utils/constants';
+} from "../utils/constants";
 
 export class MTARenderer {
   private canvasRenderer: CanvasRenderer;
@@ -54,9 +54,10 @@ export class MTARenderer {
     const ctx = this.canvasRenderer.getContext();
 
     // Check if we should start blink animation
-    const shouldBlink = predictions.length > 0 &&
-                        predictions[0].time > 20 &&
-                        predictions[0].time <= 30;
+    const shouldBlink =
+      predictions.length > 0 &&
+      predictions[0].time > 20 &&
+      predictions[0].time <= 30;
 
     this.canvasRenderer.clear();
 
@@ -82,7 +83,7 @@ export class MTARenderer {
   private async renderTrainRow(
     train: TrainTime,
     rowIndex: number,
-    ctx: CanvasRenderingContext2D
+    ctx: CanvasRenderingContext2D,
   ): Promise<void> {
     const y = ROW_Y_POSITIONS[rowIndex];
     let xCursor = 0;
@@ -100,7 +101,7 @@ export class MTARenderer {
       trainNumber,
       xCursor,
       y,
-      textColor
+      textColor,
     );
     xCursor += numberWidth;
 
@@ -110,7 +111,7 @@ export class MTARenderer {
       train.route_id,
       xCursor,
       y - 15,
-      train.is_express
+      train.is_express,
     );
     xCursor += ICON_SIZE + 1; // Icon width + 1px spacing
 
@@ -124,32 +125,23 @@ export class MTARenderer {
     // 5. Truncate destination text to fit
     const truncatedDestination = this.textRenderer.truncateTextSmart(
       train.long_name,
-      availableWidth
+      availableWidth,
     );
 
     // 6. Draw destination text
-    this.textRenderer.drawText(
-      truncatedDestination,
-      xCursor,
-      y,
-      textColor
-    );
+    this.textRenderer.drawText(truncatedDestination, xCursor, y, textColor);
 
     // 7. Draw minutes (right-aligned)
-    this.textRenderer.drawText(
-      minutesText,
-      DISPLAY_WIDTH,
-      y,
-      textColor,
-      { align: 'right' }
-    );
+    this.textRenderer.drawText(minutesText, DISPLAY_WIDTH, y, textColor, {
+      align: "right",
+    });
   }
 
   /**
    * Start blink animation for arriving train
    */
   private startBlinkAnimation(ctx: CanvasRenderingContext2D): void {
-    const text = '0min';
+    const text = "0min";
     const font = `${FONT_SIZE}px ${FONT_FAMILY}, monospace`;
     const textWidth = this.textRenderer.measureText(text);
     const x = DISPLAY_WIDTH - textWidth;
@@ -173,7 +165,7 @@ export class MTARenderer {
         if (this.onAnimationFrame) {
           this.onAnimationFrame();
         }
-      }
+      },
     );
 
     this.blinkAnimation.start();

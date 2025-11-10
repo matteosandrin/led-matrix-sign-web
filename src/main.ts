@@ -2,12 +2,18 @@
  * MTA LED Matrix Simulator - Main Application
  */
 
-import { MTAProvider } from './data/mta-provider';
-import { MTARenderer } from './renderer/mta-renderer';
-import { WebGLLEDRenderer } from './renderer/webgl-led-renderer';
-import type { TrainTime, Station } from './data/types';
-import { REFRESH_INTERVAL, DISPLAY_WIDTH, DISPLAY_HEIGHT, SCALE_FACTOR, DEFAULT_STATION } from './utils/constants';
-import './style.css';
+import { MTAProvider } from "./data/mta-provider";
+import { MTARenderer } from "./renderer/mta-renderer";
+import { WebGLLEDRenderer } from "./renderer/webgl-led-renderer";
+import type { TrainTime, Station } from "./data/types";
+import {
+  REFRESH_INTERVAL,
+  DISPLAY_WIDTH,
+  DISPLAY_HEIGHT,
+  SCALE_FACTOR,
+  DEFAULT_STATION,
+} from "./utils/constants";
+import "./style.css";
 
 class MTASimulator {
   private provider: MTAProvider;
@@ -20,11 +26,15 @@ class MTASimulator {
   private predictions: TrainTime[] = [];
 
   constructor() {
-    const sourceCanvas = document.getElementById('led-canvas') as HTMLCanvasElement;
-    const displayCanvas = document.getElementById('led-display') as HTMLCanvasElement;
+    const sourceCanvas = document.getElementById(
+      "led-canvas",
+    ) as HTMLCanvasElement;
+    const displayCanvas = document.getElementById(
+      "led-display",
+    ) as HTMLCanvasElement;
 
     if (!sourceCanvas || !displayCanvas) {
-      throw new Error('Canvas elements not found');
+      throw new Error("Canvas elements not found");
     }
 
     this.sourceCanvas = sourceCanvas;
@@ -48,7 +58,7 @@ class MTASimulator {
         glowIntensity: 0.3,
         glowRadius: 1.5,
         separationGap: 0.15,
-      }
+      },
     );
 
     // Set up animation frame callback to trigger WebGL render
@@ -59,18 +69,15 @@ class MTASimulator {
 
   private getStationFromURL(): string | null {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('station');
+    return urlParams.get("station");
   }
 
   async initialize(): Promise<void> {
     // Show loading state
-    this.updateStatus('Loading data...');
+    this.updateStatus("Loading data...");
 
     // Load data and initialize renderer
-    await Promise.all([
-      this.provider.loadData(),
-      this.renderer.initialize(),
-    ]);
+    await Promise.all([this.provider.loadData(), this.renderer.initialize()]);
 
     // Populate station selector
     this.populateStationSelector();
@@ -84,11 +91,13 @@ class MTASimulator {
     // Start auto-refresh
     this.startAutoRefresh();
 
-    this.updateStatus('Ready');
+    this.updateStatus("Ready");
   }
 
   private populateStationSelector(): void {
-    const selector = document.getElementById('station-selector') as HTMLSelectElement;
+    const selector = document.getElementById(
+      "station-selector",
+    ) as HTMLSelectElement;
     if (!selector) return;
 
     const stations = this.provider.getStations();
@@ -97,13 +106,13 @@ class MTASimulator {
     stations.sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 
     // Clear existing options
-    selector.innerHTML = '';
+    selector.innerHTML = "";
 
     // Add options
     for (const station of stations) {
-      const option = document.createElement('option');
+      const option = document.createElement("option");
       option.value = station.stop_id;
-      option.textContent = `${station.stop_name} (${station.routes.join(', ')})`;
+      option.textContent = `${station.stop_name} (${station.routes.join(", ")})`;
       if (station.stop_id === this.currentStation) {
         option.selected = true;
       }
@@ -113,21 +122,23 @@ class MTASimulator {
 
   private setupEventListeners(): void {
     // Station selector
-    const stationSelector = document.getElementById('station-selector') as HTMLSelectElement;
+    const stationSelector = document.getElementById(
+      "station-selector",
+    ) as HTMLSelectElement;
     if (stationSelector) {
-      stationSelector.addEventListener('change', async (e) => {
+      stationSelector.addEventListener("change", async (e) => {
         this.currentStation = (e.target as HTMLSelectElement).value;
         await this.refresh();
       });
     }
 
     // Direction buttons
-    const uptownBtn = document.getElementById('uptown-btn');
-    const downtownBtn = document.getElementById('downtown-btn');
-    const bothBtn = document.getElementById('both-btn');
+    const uptownBtn = document.getElementById("uptown-btn");
+    const downtownBtn = document.getElementById("downtown-btn");
+    const bothBtn = document.getElementById("both-btn");
 
     if (uptownBtn) {
-      uptownBtn.addEventListener('click', async () => {
+      uptownBtn.addEventListener("click", async () => {
         this.currentDirection = 0;
         this.updateDirectionButtons();
         await this.refresh();
@@ -135,7 +146,7 @@ class MTASimulator {
     }
 
     if (downtownBtn) {
-      downtownBtn.addEventListener('click', async () => {
+      downtownBtn.addEventListener("click", async () => {
         this.currentDirection = 1;
         this.updateDirectionButtons();
         await this.refresh();
@@ -143,7 +154,7 @@ class MTASimulator {
     }
 
     if (bothBtn) {
-      bothBtn.addEventListener('click', async () => {
+      bothBtn.addEventListener("click", async () => {
         this.currentDirection = null;
         this.updateDirectionButtons();
         await this.refresh();
@@ -152,20 +163,20 @@ class MTASimulator {
   }
 
   private updateDirectionButtons(): void {
-    const uptownBtn = document.getElementById('uptown-btn');
-    const downtownBtn = document.getElementById('downtown-btn');
-    const bothBtn = document.getElementById('both-btn');
+    const uptownBtn = document.getElementById("uptown-btn");
+    const downtownBtn = document.getElementById("downtown-btn");
+    const bothBtn = document.getElementById("both-btn");
 
-    [uptownBtn, downtownBtn, bothBtn].forEach(btn => {
-      btn?.classList.remove('active');
+    [uptownBtn, downtownBtn, bothBtn].forEach((btn) => {
+      btn?.classList.remove("active");
     });
 
     if (this.currentDirection === 0) {
-      uptownBtn?.classList.add('active');
+      uptownBtn?.classList.add("active");
     } else if (this.currentDirection === 1) {
-      downtownBtn?.classList.add('active');
+      downtownBtn?.classList.add("active");
     } else {
-      bothBtn?.classList.add('active');
+      bothBtn?.classList.add("active");
     }
   }
 
@@ -173,7 +184,7 @@ class MTASimulator {
     // Get predictions
     this.predictions = this.provider.getPredictions(
       this.currentStation,
-      this.currentDirection
+      this.currentDirection,
     );
 
     // Get first and second train
@@ -201,30 +212,30 @@ class MTASimulator {
     const station = this.provider.getStation(this.currentStation);
     if (!station) return;
 
-    const infoDiv = document.getElementById('station-info');
+    const infoDiv = document.getElementById("station-info");
     if (!infoDiv) return;
 
     const directionLabel = this.getDirectionLabel(station);
     const trainCount = this.predictions.length;
 
     infoDiv.innerHTML = `
-      <strong>${station.stop_name}</strong> - ${station.routes.join(', ')}<br>
+      <strong>${station.stop_name}</strong> - ${station.routes.join(", ")}<br>
       Direction: ${directionLabel} | Upcoming trains: ${trainCount}
     `;
   }
 
   private getDirectionLabel(station: Station): string {
     if (this.currentDirection === 0) {
-      return station.north_direction_label || 'Uptown';
+      return station.north_direction_label || "Uptown";
     } else if (this.currentDirection === 1) {
-      return station.south_direction_label || 'Downtown';
+      return station.south_direction_label || "Downtown";
     } else {
-      return 'Both';
+      return "Both";
     }
   }
 
   private updateStatus(status: string): void {
-    const statusDiv = document.getElementById('status');
+    const statusDiv = document.getElementById("status");
     if (statusDiv) {
       statusDiv.textContent = status;
     }
@@ -239,16 +250,16 @@ class MTASimulator {
 }
 
 // Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const app = new MTASimulator();
   try {
     await app.initialize();
   } catch (error) {
-    console.error('Failed to initialize app:', error);
-    const statusDiv = document.getElementById('status');
+    console.error("Failed to initialize app:", error);
+    const statusDiv = document.getElementById("status");
     if (statusDiv) {
       statusDiv.textContent = `Error: ${error}`;
-      statusDiv.style.color = 'red';
+      statusDiv.style.color = "red";
     }
   }
 });

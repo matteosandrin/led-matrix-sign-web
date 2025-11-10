@@ -3,12 +3,12 @@
  */
 
 export const DayType = {
-  WEEKDAY: 'weekday',
-  SATURDAY: 'saturday',
-  SUNDAY: 'sunday',
+  WEEKDAY: "weekday",
+  SATURDAY: "saturday",
+  SUNDAY: "sunday",
 } as const;
 
-export type DayType = typeof DayType[keyof typeof DayType];
+export type DayType = (typeof DayType)[keyof typeof DayType];
 
 export interface HistoricalTrainTime {
   route_id: string;

@@ -2,7 +2,7 @@
  * Text rendering with MTASans font and smart truncation
  */
 
-import { FONT_SIZE, FONT_FAMILY, ABBREVIATIONS } from '../utils/constants';
+import { FONT_SIZE, FONT_FAMILY, ABBREVIATIONS } from "../utils/constants";
 
 export class TextRenderer {
   private ctx: CanvasRenderingContext2D;
@@ -22,7 +22,7 @@ export class TextRenderer {
       await document.fonts.load(`${FONT_SIZE}px ${FONT_FAMILY}`);
       this.fontLoaded = true;
     } catch (error) {
-      console.warn('Font loading failed, using fallback', error);
+      console.warn("Font loading failed, using fallback", error);
       this.fontLoaded = true; // Continue anyway
     }
   }
@@ -36,11 +36,11 @@ export class TextRenderer {
     y: number,
     color: string,
     options: {
-      align?: 'left' | 'right';
-      baseline?: 'top' | 'middle' | 'bottom';
-    } = {}
+      align?: "left" | "right";
+      baseline?: "top" | "middle" | "bottom";
+    } = {},
   ): number {
-    const { align = 'left', baseline = 'bottom' } = options;
+    const { align = "left", baseline = "bottom" } = options;
 
     this.ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}, monospace`;
     this.ctx.fillStyle = color;
@@ -71,8 +71,8 @@ export class TextRenderer {
     }
 
     // Step 1: Remove hyphenated suffixes
-    if (text.includes('-')) {
-      const parts = text.split('-');
+    if (text.includes("-")) {
+      const parts = text.split("-");
       const withoutSuffix = parts[0];
       if (this.measureText(withoutSuffix) <= availableWidth) {
         return withoutSuffix;
@@ -89,9 +89,9 @@ export class TextRenderer {
     }
 
     // Step 3: Remove words from the end
-    const words = abbreviated.split(' ');
+    const words = abbreviated.split(" ");
     for (let i = words.length - 1; i > 0; i--) {
-      const truncated = words.slice(0, i).join(' ');
+      const truncated = words.slice(0, i).join(" ");
       if (this.measureText(truncated) <= availableWidth) {
         return truncated;
       }
@@ -105,7 +105,7 @@ export class TextRenderer {
       }
     }
 
-    return '';
+    return "";
   }
 
   /**
@@ -117,9 +117,10 @@ export class TextRenderer {
     return {
       width: metrics.width,
       // Use actualBoundingBox if available, otherwise use font size
-      height: metrics.actualBoundingBoxAscent !== undefined
-        ? metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
-        : FONT_SIZE,
+      height:
+        metrics.actualBoundingBoxAscent !== undefined
+          ? metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+          : FONT_SIZE,
     };
   }
 }

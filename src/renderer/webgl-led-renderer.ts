@@ -9,10 +9,10 @@
  */
 
 export interface LEDShaderParams {
-  ledSize: number;        // Size of LED relative to cell (0-1, default 0.75)
-  glowIntensity: number;  // Strength of glow effect (0-2, default 0.8)
-  glowRadius: number;     // Radius of glow in pixels (default 2.5)
-  separationGap: number;  // Gap between LEDs (0-1, default 0.25)
+  ledSize: number; // Size of LED relative to cell (0-1, default 0.75)
+  glowIntensity: number; // Strength of glow effect (0-2, default 0.8)
+  glowRadius: number; // Radius of glow in pixels (default 2.5)
+  separationGap: number; // Gap between LEDs (0-1, default 0.25)
 }
 
 const DEFAULT_PARAMS: LEDShaderParams = {
@@ -49,21 +49,21 @@ export class WebGLLEDRenderer {
     displayCanvas: HTMLCanvasElement,
     sourceWidth: number,
     sourceHeight: number,
-    params: Partial<LEDShaderParams> = {}
+    params: Partial<LEDShaderParams> = {},
   ) {
     this.displayCanvas = displayCanvas;
     this.sourceWidth = sourceWidth;
     this.sourceHeight = sourceHeight;
     this.params = { ...DEFAULT_PARAMS, ...params };
 
-    const gl = displayCanvas.getContext('webgl', {
+    const gl = displayCanvas.getContext("webgl", {
       alpha: false,
       antialias: false,
       preserveDrawingBuffer: false,
     });
 
     if (!gl) {
-      throw new Error('WebGL not supported');
+      throw new Error("WebGL not supported");
     }
 
     this.gl = gl;
@@ -170,12 +170,18 @@ export class WebGLLEDRenderer {
     `;
 
     // Compile shaders
-    const vertexShader = this.compileShader(gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = this.compileShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+    const vertexShader = this.compileShader(
+      gl.VERTEX_SHADER,
+      vertexShaderSource,
+    );
+    const fragmentShader = this.compileShader(
+      gl.FRAGMENT_SHADER,
+      fragmentShaderSource,
+    );
 
     // Link program
     const program = gl.createProgram();
-    if (!program) throw new Error('Failed to create program');
+    if (!program) throw new Error("Failed to create program");
 
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
@@ -183,7 +189,7 @@ export class WebGLLEDRenderer {
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       const info = gl.getProgramInfoLog(program);
-      throw new Error('Failed to link program: ' + info);
+      throw new Error("Failed to link program: " + info);
     }
 
     this.program = program;
@@ -191,22 +197,22 @@ export class WebGLLEDRenderer {
 
     // Get attribute and uniform locations
     this.locations = {
-      position: gl.getAttribLocation(program, 'aPosition'),
-      texCoord: gl.getAttribLocation(program, 'aTexCoord'),
-      uSourceTexture: gl.getUniformLocation(program, 'uSourceTexture'),
-      uSourceSize: gl.getUniformLocation(program, 'uSourceSize'),
-      uDisplaySize: gl.getUniformLocation(program, 'uDisplaySize'),
-      uLEDSize: gl.getUniformLocation(program, 'uLEDSize'),
-      uGlowIntensity: gl.getUniformLocation(program, 'uGlowIntensity'),
-      uGlowRadius: gl.getUniformLocation(program, 'uGlowRadius'),
-      uSeparationGap: gl.getUniformLocation(program, 'uSeparationGap'),
+      position: gl.getAttribLocation(program, "aPosition"),
+      texCoord: gl.getAttribLocation(program, "aTexCoord"),
+      uSourceTexture: gl.getUniformLocation(program, "uSourceTexture"),
+      uSourceSize: gl.getUniformLocation(program, "uSourceSize"),
+      uDisplaySize: gl.getUniformLocation(program, "uDisplaySize"),
+      uLEDSize: gl.getUniformLocation(program, "uLEDSize"),
+      uGlowIntensity: gl.getUniformLocation(program, "uGlowIntensity"),
+      uGlowRadius: gl.getUniformLocation(program, "uGlowRadius"),
+      uSeparationGap: gl.getUniformLocation(program, "uSeparationGap"),
     };
   }
 
   private compileShader(type: number, source: string): WebGLShader {
     const gl = this.gl;
     const shader = gl.createShader(type);
-    if (!shader) throw new Error('Failed to create shader');
+    if (!shader) throw new Error("Failed to create shader");
 
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
@@ -214,7 +220,7 @@ export class WebGLLEDRenderer {
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       const info = gl.getShaderInfoLog(shader);
       gl.deleteShader(shader);
-      throw new Error('Failed to compile shader: ' + info);
+      throw new Error("Failed to compile shader: " + info);
     }
 
     return shader;
@@ -226,10 +232,22 @@ export class WebGLLEDRenderer {
     // Full-screen quad (two triangles)
     const vertices = new Float32Array([
       // Position (x, y)  TexCoord (u, v)
-      -1, -1,             0, 1,  // Bottom-left
-       1, -1,             1, 1,  // Bottom-right
-      -1,  1,             0, 0,  // Top-left
-       1,  1,             1, 0,  // Top-right
+      -1,
+      -1,
+      0,
+      1, // Bottom-left
+      1,
+      -1,
+      1,
+      1, // Bottom-right
+      -1,
+      1,
+      0,
+      0, // Top-left
+      1,
+      1,
+      1,
+      0, // Top-right
     ]);
 
     const buffer = gl.createBuffer();
@@ -241,12 +259,26 @@ export class WebGLLEDRenderer {
 
     if (this.locations.position !== undefined) {
       gl.enableVertexAttribArray(this.locations.position);
-      gl.vertexAttribPointer(this.locations.position, 2, gl.FLOAT, false, stride, 0);
+      gl.vertexAttribPointer(
+        this.locations.position,
+        2,
+        gl.FLOAT,
+        false,
+        stride,
+        0,
+      );
     }
 
     if (this.locations.texCoord !== undefined) {
       gl.enableVertexAttribArray(this.locations.texCoord);
-      gl.vertexAttribPointer(this.locations.texCoord, 2, gl.FLOAT, false, stride, 2 * Float32Array.BYTES_PER_ELEMENT);
+      gl.vertexAttribPointer(
+        this.locations.texCoord,
+        2,
+        gl.FLOAT,
+        false,
+        stride,
+        2 * Float32Array.BYTES_PER_ELEMENT,
+      );
     }
   }
 
@@ -254,7 +286,7 @@ export class WebGLLEDRenderer {
     const gl = this.gl;
     const texture = gl.createTexture();
 
-    if (!texture) throw new Error('Failed to create texture');
+    if (!texture) throw new Error("Failed to create texture");
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -284,12 +316,27 @@ export class WebGLLEDRenderer {
 
     // Update texture from source canvas
     gl.bindTexture(gl.TEXTURE_2D, this.sourceTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sourceCanvas);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      sourceCanvas,
+    );
 
     // Set uniforms
     gl.uniform1i(this.locations.uSourceTexture!, 0);
-    gl.uniform2f(this.locations.uSourceSize!, this.sourceWidth, this.sourceHeight);
-    gl.uniform2f(this.locations.uDisplaySize!, this.displayCanvas.width, this.displayCanvas.height);
+    gl.uniform2f(
+      this.locations.uSourceSize!,
+      this.sourceWidth,
+      this.sourceHeight,
+    );
+    gl.uniform2f(
+      this.locations.uDisplaySize!,
+      this.displayCanvas.width,
+      this.displayCanvas.height,
+    );
     gl.uniform1f(this.locations.uLEDSize!, this.params.ledSize);
     gl.uniform1f(this.locations.uGlowIntensity!, this.params.glowIntensity);
     gl.uniform1f(this.locations.uGlowRadius!, this.params.glowRadius);

@@ -2,9 +2,9 @@
  * MTA data provider - loads historical data and calculates predictions
  */
 
-import type { HistoricalData, TrainTime, Station } from './types';
-import { DayType } from './types';
-import { MAX_NUM_PREDICTIONS } from '../utils/constants';
+import type { HistoricalData, TrainTime, Station } from "./types";
+import { DayType } from "./types";
+import { MAX_NUM_PREDICTIONS } from "../utils/constants";
 
 interface CompressedHistoricalData {
   names: string[];
@@ -22,14 +22,14 @@ export class MTAProvider {
 
   async loadData(): Promise<void> {
     // Load historical data (compressed format)
-    const histResponse = await fetch('/historical-data.json');
+    const histResponse = await fetch("/historical-data.json");
     const compressedData: CompressedHistoricalData = await histResponse.json();
 
     // Decompress data
     this.historicalData = this.decompressHistoricalData(compressedData);
 
     // Load stations
-    const stationsResponse = await fetch('/stations.json');
+    const stationsResponse = await fetch("/stations.json");
     this.stations = await stationsResponse.json();
 
     // Build set of all child station IDs for filtering
@@ -39,23 +39,25 @@ export class MTAProvider {
   /**
    * Decompress the historical data from compact format
    */
-  private decompressHistoricalData(compressed: CompressedHistoricalData): HistoricalData {
+  private decompressHistoricalData(
+    compressed: CompressedHistoricalData,
+  ): HistoricalData {
     const dayTypeMap: Record<string, DayType> = {
-      'w': DayType.WEEKDAY,
-      's': DayType.SATURDAY,
-      'u': DayType.SUNDAY,
+      w: DayType.WEEKDAY,
+      s: DayType.SATURDAY,
+      u: DayType.SUNDAY,
     };
 
     const decompressed: HistoricalData = {};
 
     for (const stopId in compressed.data) {
-      decompressed[stopId] = compressed.data[stopId].map(entry => ({
+      decompressed[stopId] = compressed.data[stopId].map((entry) => ({
         route_id: entry[0],
         direction_id: entry[1],
         long_name: compressed.names[entry[2]],
         departure_time: entry[3],
-        trip_id: '', // Not stored in compressed format
-        day_type: dayTypeMap[entry[4]] || entry[4] as DayType,
+        trip_id: "", // Not stored in compressed format
+        day_type: dayTypeMap[entry[4]] || (entry[4] as DayType),
       }));
     }
 
@@ -80,11 +82,13 @@ export class MTAProvider {
    * Get stations for display (excludes child stations)
    */
   getStations(): Station[] {
-    return this.stations.filter(station => !this.childStationIds.has(station.stop_id));
+    return this.stations.filter(
+      (station) => !this.childStationIds.has(station.stop_id),
+    );
   }
 
   getStation(stopId: string): Station | undefined {
-    return this.stations.find(s => s.stop_id === stopId);
+    return this.stations.find((s) => s.stop_id === stopId);
   }
 
   /**
@@ -123,7 +127,10 @@ export class MTAProvider {
         }
 
         // Filter by direction if specified
-        if (direction !== null && histTime.direction_id !== direction.toString()) {
+        if (
+          direction !== null &&
+          histTime.direction_id !== direction.toString()
+        ) {
           continue;
         }
 
@@ -146,7 +153,10 @@ export class MTAProvider {
         }
 
         // Check if this is an express train
-        const isExpress = this.isExpressTrain(histTime.route_id, histTime.trip_id);
+        const isExpress = this.isExpressTrain(
+          histTime.route_id,
+          histTime.trip_id,
+        );
 
         predictions.push({
           route_id: histTime.route_id,
@@ -222,11 +232,11 @@ export class MTAProvider {
    */
   private isExpressTrain(routeId: string, tripId: string): boolean {
     // Routes 4 and 6 have express service
-    if (routeId !== '4' && routeId !== '6') {
+    if (routeId !== "4" && routeId !== "6") {
       return false;
     }
     // Express trains typically have different patterns in trip IDs
     // This is a simplified check - in reality, you'd need schedule data
-    return tripId.includes('_X') || tripId.includes('EXPRESS');
+    return tripId.includes("_X") || tripId.includes("EXPRESS");
   }
 }

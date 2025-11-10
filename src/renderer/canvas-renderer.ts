@@ -2,7 +2,12 @@
  * Canvas renderer for 160x32 LED matrix display
  */
 
-import { DISPLAY_WIDTH, DISPLAY_HEIGHT, SCALE_FACTOR, BLACK } from '../utils/constants';
+import {
+  DISPLAY_WIDTH,
+  DISPLAY_HEIGHT,
+  SCALE_FACTOR,
+  BLACK,
+} from "../utils/constants";
 
 export class CanvasRenderer {
   private canvas: HTMLCanvasElement;
@@ -11,9 +16,9 @@ export class CanvasRenderer {
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) {
-      throw new Error('Could not get 2D context');
+      throw new Error("Could not get 2D context");
     }
     this.ctx = ctx;
 
@@ -97,7 +102,7 @@ export class CanvasRenderer {
    * Parse RGB color string to components
    */
   parseRgb(color: string): { r: number; g: number; b: number } {
-    if (color.startsWith('#')) {
+    if (color.startsWith("#")) {
       return this.hexToRgb(color);
     }
     // Handle rgb(r, g, b) format

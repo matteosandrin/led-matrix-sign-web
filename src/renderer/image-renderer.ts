@@ -2,7 +2,7 @@
  * Image rendering for route icons with color application
  */
 
-import { ICON_SIZE, ROUTE_COLORS } from '../utils/constants';
+import { ICON_SIZE, ROUTE_COLORS } from "../utils/constants";
 
 export class ImageRenderer {
   private iconCache: Map<string, HTMLImageElement> = new Map();
@@ -11,7 +11,10 @@ export class ImageRenderer {
   /**
    * Load a route icon
    */
-  async loadIcon(routeId: string, isExpress: boolean = false): Promise<HTMLImageElement> {
+  async loadIcon(
+    routeId: string,
+    isExpress: boolean = false,
+  ): Promise<HTMLImageElement> {
     const filename = this.getIconFilename(routeId, isExpress);
     const cacheKey = filename;
 
@@ -35,8 +38,11 @@ export class ImageRenderer {
   /**
    * Get icon with color applied
    */
-  async getColoredIcon(routeId: string, isExpress: boolean = false): Promise<HTMLCanvasElement> {
-    const color = ROUTE_COLORS[routeId] || '#FFFFFF';
+  async getColoredIcon(
+    routeId: string,
+    isExpress: boolean = false,
+  ): Promise<HTMLCanvasElement> {
+    const color = ROUTE_COLORS[routeId] || "#FFFFFF";
     const cacheKey = `${routeId}_${isExpress}_${color}`;
 
     if (this.coloredIconCache.has(cacheKey)) {
@@ -47,12 +53,12 @@ export class ImageRenderer {
     const img = await this.loadIcon(routeId, isExpress);
 
     // Create a canvas to apply color
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = ICON_SIZE;
     canvas.height = ICON_SIZE;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) {
-      throw new Error('Could not get 2D context for icon coloring');
+      throw new Error("Could not get 2D context for icon coloring");
     }
 
     // Draw the original image
@@ -71,7 +77,7 @@ export class ImageRenderer {
       const grayscale = data[i]; // Assuming grayscale image (R = G = B)
       const factor = grayscale / 255;
 
-      data[i] = Math.round(factor * targetColor.r);     // R
+      data[i] = Math.round(factor * targetColor.r); // R
       data[i + 1] = Math.round(factor * targetColor.g); // G
       data[i + 2] = Math.round(factor * targetColor.b); // B
       // Alpha (data[i + 3]) remains unchanged
@@ -93,7 +99,7 @@ export class ImageRenderer {
     routeId: string,
     x: number,
     y: number,
-    isExpress: boolean = false
+    isExpress: boolean = false,
   ): Promise<void> {
     const coloredIcon = await this.getColoredIcon(routeId, isExpress);
     targetCtx.drawImage(coloredIcon, x, y, ICON_SIZE, ICON_SIZE);
@@ -103,7 +109,7 @@ export class ImageRenderer {
    * Get the filename for a route icon
    */
   private getIconFilename(routeId: string, isExpress: boolean): string {
-    if (isExpress && (routeId === '4' || routeId === '6')) {
+    if (isExpress && (routeId === "4" || routeId === "6")) {
       return `mta_${routeId}_express.png`;
     }
     return `mta_${routeId}.png`;
@@ -134,7 +140,7 @@ export class ImageRenderer {
       loadPromises.push(this.loadIcon(route, false));
 
       // Load express versions for routes 4 and 6
-      if (route === '4' || route === '6') {
+      if (route === "4" || route === "6") {
         loadPromises.push(this.loadIcon(route, true));
       }
     }
