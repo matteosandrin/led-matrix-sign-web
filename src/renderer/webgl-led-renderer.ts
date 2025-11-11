@@ -13,6 +13,7 @@ export interface LEDShaderParams {
   glowIntensity: number; // Strength of glow effect (0-2, default 0.8)
   glowRadius: number; // Radius of glow in pixels (default 2.5)
   separationGap: number; // Gap between LEDs (0-1, default 0.25)
+  unlitLEDColor: [number, number, number]; // RGB color for unlit LEDs
 }
 
 const DEFAULT_PARAMS: LEDShaderParams = {
@@ -20,6 +21,7 @@ const DEFAULT_PARAMS: LEDShaderParams = {
   glowIntensity: 0.3,
   glowRadius: 1.5,
   separationGap: 0.15,
+  unlitLEDColor: [0.2, 0.2, 0.2], // Subtle gray for unlit LEDs
 };
 
 export class WebGLLEDRenderer {
@@ -41,6 +43,7 @@ export class WebGLLEDRenderer {
     uGlowIntensity?: WebGLUniformLocation | null;
     uGlowRadius?: WebGLUniformLocation | null;
     uSeparationGap?: WebGLUniformLocation | null;
+    uUnlitLEDColor?: WebGLUniformLocation | null;
   } = {};
 
   private params: LEDShaderParams;
@@ -98,6 +101,7 @@ export class WebGLLEDRenderer {
       uniform float uGlowIntensity;  // Glow strength
       uniform float uGlowRadius;     // Glow radius in source pixels
       uniform float uSeparationGap;  // Gap between LEDs (0-1)
+      uniform vec3 uUnlitLEDColor;   // Color of unlit LEDs
 
       varying vec2 vTexCoord;
 
@@ -155,8 +159,12 @@ export class WebGLLEDRenderer {
         float ledRadius = (0.5 - uSeparationGap * 0.5) * uLEDSize;
         float ledMask = ledShape(distToLED, ledRadius);
 
-        // Apply LED color with shape mask
-        vec3 color = ledColor * ledMask;
+        // Mix between unlit LED color and actual LED color based on brightness
+        float ledBrightness = dot(ledColor, vec3(0.299, 0.587, 0.114));
+        vec3 baseLEDColor = mix(uUnlitLEDColor, ledColor, ledBrightness);
+
+        // Apply LED color with shape mask, using unlit color as base
+        vec3 color = mix(vec3(0.0), baseLEDColor, ledMask);
 
         // Add glow/bloom effect
         if (uGlowIntensity > 0.0) {
@@ -206,6 +214,7 @@ export class WebGLLEDRenderer {
       uGlowIntensity: gl.getUniformLocation(program, "uGlowIntensity"),
       uGlowRadius: gl.getUniformLocation(program, "uGlowRadius"),
       uSeparationGap: gl.getUniformLocation(program, "uSeparationGap"),
+      uUnlitLEDColor: gl.getUniformLocation(program, "uUnlitLEDColor"),
     };
   }
 
@@ -341,6 +350,12 @@ export class WebGLLEDRenderer {
     gl.uniform1f(this.locations.uGlowIntensity!, this.params.glowIntensity);
     gl.uniform1f(this.locations.uGlowRadius!, this.params.glowRadius);
     gl.uniform1f(this.locations.uSeparationGap!, this.params.separationGap);
+    gl.uniform3f(
+      this.locations.uUnlitLEDColor!,
+      this.params.unlitLEDColor[0],
+      this.params.unlitLEDColor[1],
+      this.params.unlitLEDColor[2],
+    );
 
     // Set viewport and clear
     gl.viewport(0, 0, this.displayCanvas.width, this.displayCanvas.height);
